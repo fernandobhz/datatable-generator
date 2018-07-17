@@ -3,7 +3,19 @@ namespace Fernandobhz;
 
 Class DatatableGenerator {
 	
-	public static function code($table, $title) {
+	public static function dtable($table, $title) {
+		self::code($table, $title, 'data-table');
+	}
+	
+	public static function dlist($table, $title) {
+		self::code($table, $title, 'data-table-list');
+	}
+	
+	public static function dnew($table, $title) {
+		self::code($table, $title, 'data-table-new');
+	}
+	
+	private static function code($table, $title, $cls) {
 		$table = json_encode(json_decode($table)); 
 		$cols = array_keys($rows[0]);
 		$rows = [];
@@ -19,7 +31,7 @@ Class DatatableGenerator {
 					<div class=col>
 						<table 
 							id="mytable" 
-							class="table table-striped table-bordered data-table-new"
+							class="table table-striped table-bordered $cls"
 							data-name="Pessoas" 
 							data-action="add">				
 							<thead>
