@@ -18,6 +18,47 @@ Class DatatableGenerator {
 	public static function dnew($table, $cols) {
 		self::code($table, $cols, 'data-table-new');
 	}
+
+	private static function head() {
+	:?>
+		$(function() {
+			$('.data-table').DataTable({
+				dom: 'rt<".pesqdt"f><".btnsdt"B><"dtextra">p'
+				, buttons: [ 'copy', 'csv', 'excel', 'print']
+			});
+			
+			$('.data-table-list').DataTable({
+				dom: 'rt<".pesqdt"f><"dtextra">p'
+			});
+			
+			$(".data-table-novo").each(function(index, elm) {
+				var nm = $(elm).attr("data-name");
+				
+				if ( ! nm ) {
+					alertify.notify("data-name sao necessários no elemento: " + elm.id);
+					return;
+				}
+				
+				
+				var ac = $(elm).attr("data-action");
+				
+				if ( ! ac ) {
+					alertify.notify("data-action sao necessários no elemento: " + elm.id);
+					return;
+				}
+				
+				
+				$('.data-table-novo').DataTable({
+					dom: 'rt<".pesqdt"f><".btnsdt"B><".dtnovo' + nm + '">p'
+					, buttons: [ 'copy', 'csv', 'excel', 'print']
+				});
+
+				$(".dtnovo" + nm).html('<button class="btn btn-default" onclick="location=\'/' + ac + '/add\'"><span><i class="fa fa-plus"></i> ' + nm + '</span></button>');
+				$(".dtnovo" + nm).addClass('dtnovo');
+			});
+		});
+	<?php
+	}
 	
 	private static function code($table, $cols, $cls) {
 		$table = (array)json_decode(json_encode($table));
