@@ -2,6 +2,10 @@
 namespace Fernandobhz;
 
 Class DatatableGenerator {
+
+	public static function test() {
+		echo ("hello datatable generator");
+	}
 	
 	public static function dtable($table, $cols) {
 		self::code($table, $cols, 'data-table');
