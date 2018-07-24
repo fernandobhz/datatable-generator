@@ -1,0 +1,3 @@
+@pwd
+@git push
+@pause
