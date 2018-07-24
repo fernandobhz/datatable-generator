@@ -21,43 +21,82 @@ Class DatatableGenerator {
 
 	private static function head() {
 	:?>
-		$(function() {
-			$('.data-table').DataTable({
-				dom: 'rt<".pesqdt"f><".btnsdt"B><"dtextra">p'
-				, buttons: [ 'copy', 'csv', 'excel', 'print']
-			});
+		<style>
+			.pesqdt {
+				float: left;
+				margin-top: 5px;
+				margin-left: 10px;
+			}
 			
-			$('.data-table-list').DataTable({
-				dom: 'rt<".pesqdt"f><"dtextra">p'
-			});
+			.btnsdt {
+				float: left;
+				margin-top: 5px;
+				margin-left: 10px;
+			}
 			
-			$(".data-table-novo").each(function(index, elm) {
-				var nm = $(elm).attr("data-name");
-				
-				if ( ! nm ) {
-					alertify.notify("data-name sao necessários no elemento: " + elm.id);
-					return;
-				}
-				
-				
-				var ac = $(elm).attr("data-action");
-				
-				if ( ! ac ) {
-					alertify.notify("data-action sao necessários no elemento: " + elm.id);
-					return;
-				}
-				
-				
-				$('.data-table-novo').DataTable({
-					dom: 'rt<".pesqdt"f><".btnsdt"B><".dtnovo' + nm + '">p'
+			.dtextra {
+				float: left;
+				margin-top: 5px;
+				margin-left: 10px;
+			}
+			
+			.dtnovo {
+				float: left;
+				margin-top: 5px;
+				margin-left: 10px;
+			}
+			
+			.borda-vermelha {
+				border: 1px solid red
+			}
+		
+			.borda-azul {
+				border: 1px solid blue
+			}
+
+			a.linkno {
+				text-decoration: none;
+			}
+		</style>
+		<script>
+			$(function() {
+				$('.data-table').DataTable({
+					dom: 'rt<".pesqdt"f><".btnsdt"B><"dtextra">p'
 					, buttons: [ 'copy', 'csv', 'excel', 'print']
 				});
+				
+				$('.data-table-list').DataTable({
+					dom: 'rt<".pesqdt"f><"dtextra">p'
+				});
+				
+				$(".data-table-new").each(function(index, elm) {
+					var nm = $(elm).attr("data-name");
+					
+					if ( ! nm ) {
+						alertify.notify("data-name sao necessários no elemento: " + elm.id);
+						return;
+					}
+					
+					
+					var ac = $(elm).attr("data-action");
+					
+					if ( ! ac ) {
+						alertify.notify("data-action sao necessários no elemento: " + elm.id);
+						return;
+					}
+					
+					
+					$('.data-table-new').DataTable({
+						dom: 'rt<".pesqdt"f><".btnsdt"B><".dtnovo' + nm + '">p'
+						, buttons: [ 'copy', 'csv', 'excel', 'print']
+					});
 
-				$(".dtnovo" + nm).html('<button class="btn btn-default" onclick="location=\'/' + ac + '/add\'"><span><i class="fa fa-plus"></i> ' + nm + '</span></button>');
-				$(".dtnovo" + nm).addClass('dtnovo');
+					$(".dtnovo" + nm).html('<button class="btn btn-default" onclick="location=\'/' + ac + '/add\'"><span><i class="fa fa-plus"></i> ' + nm + '</span></button>');
+					$(".dtnovo" + nm).addClass('dtnovo');
+				});
 			});
-		});
-	<?php
+		</script>
+		<?php
 	}
 	
 	private static function code($table, $cols, $cls) {
