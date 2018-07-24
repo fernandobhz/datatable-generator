@@ -20,7 +20,7 @@ Class DatatableGenerator {
 	}
 
 	private static function head() {
-	:?>
+	?>
 		<style>
 			.pesqdt {
 				float: left;
