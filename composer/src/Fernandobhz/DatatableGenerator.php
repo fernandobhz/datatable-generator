@@ -111,7 +111,6 @@ Class DatatableGenerator {
 		//classes
 		$opts['class'][] = 'dtgen';
 		$opts['class'][] = 'dtgen-' . $opts['rand'];
-
 		$opts['class'][] = 'table';
 		$opts['class'][] = 'table-stripped';
 		$opts['class'][] = 'table-bordered';
