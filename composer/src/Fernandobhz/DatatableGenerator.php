@@ -12,7 +12,7 @@ Class DatatableGenerator {
 		include($file);
 		return ob_get_clean();
 	}
-	
+
 	public static function kill($s) {
 		echo "</template><pre>";
 		var_dump($s);
@@ -20,7 +20,7 @@ Class DatatableGenerator {
 		throw new \Exception($s);
 		die();
 	}
-	
+
 	public static function forceArray(...$values) {
 		$ret = [];
 		foreach ( $values as $value) {
@@ -60,7 +60,7 @@ Class DatatableGenerator {
 		if ( ! $opts['cols'] ) self::kill("opts['col'] is required" . var_export($opts, true) );
 
 		if ( ! isset($opts['class']) ) $opts['class'] = [];
-		if ( ! is_array($opts['class']) ) $opts['class'] = [ $opts['class'] ];
+		if ( ! is_array($opts['class']) ) $opts['class'] = self::forceArray(explode($opts['class'], " "));
 
 		if ( $opts['rows'] ) {
 			foreach ( $opts['rows'] as $index => $row ) {
@@ -83,7 +83,7 @@ Class DatatableGenerator {
 		if ( $opts['id'] ) $opts['attrs']['id'] = $opts['id'];
 
 		$opts['cssclass'] = 'dtgen' . $opts['rand'];
-		
+
 		return $opts;
 	}
 
@@ -103,7 +103,7 @@ Class DatatableGenerator {
 			return self::verb2code($args[0], 'data-table-list');
 		} else {
 			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			return self::verb2code($rows, $cols, $opts, 'data-table-list');		
+			return self::verb2code($rows, $cols, $opts, 'data-table-list');
 		}
 	}
 
@@ -126,8 +126,8 @@ Class DatatableGenerator {
 			$opts['rows'] = $rows;
 			$opts['cols'] = $cols;
 		}
-
-		$opts['class'] = self::forceArray($verb, $opt['class']);
+		
+		$opts['verb'] = $verb;
 		return self::code($opts);
 	}
 
@@ -140,6 +140,7 @@ Class DatatableGenerator {
 		$name = $opts['name'];
 		$action = $opts['action'];
 		$cssclass = $opts['cssclass'];
+		$verb = $opts['verb'];
 
 		if ( $opts['server-side'] ) {
 			$attrs['data-server-side'] = $opts['server-side'];
@@ -159,16 +160,22 @@ Class DatatableGenerator {
 			;
 		}
 
-		$values = []; 
+		$values = [];
 		if ( $rows ) {
 			foreach ( $rows as $row ) {
 				$values[] = array_values($row);
 			}
 		}
-		
-		ob_start(); include('HeadCode.php'); $head = ob_get_clean();
+
+		ob_start(); include('StyleCode.php'); $style = ob_get_clean();
+		ob_start(); include('ScriptCode.php'); $script = ob_get_clean();
 		ob_start(); include('TableCode.php'); $body = ob_get_clean();
-		return (object)['body' => $body, 'head' => $head];
+		return (object) [
+			'body' => $body,
+			'style' => $style,
+			'script' => $script,
+			'head' => $style.$script
+		];
 	}
 }
 ?>

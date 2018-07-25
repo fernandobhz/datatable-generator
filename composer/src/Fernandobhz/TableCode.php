@@ -1,6 +1,6 @@
 <table
 	<?=$attributes?>
-	class="<?="$cssclass $classes"?> dtgen table table-striped table-bordered"
+	class="<?="$verb-$cssclass $classes"?> dtgen table table-striped table-bordered"
 	data-name="<?=$name?>" 
 	data-action="<?=$action?>"
 	>
