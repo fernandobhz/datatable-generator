@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Fernandobhz;
 
 Class DatatableGenerator {
@@ -6,133 +6,164 @@ Class DatatableGenerator {
 	public static function test() {
 		echo ("hello datatable generator");
 	}
-	
-	public static function dtable($table, $cols) {
-		self::code($table, $cols, 'data-table');
-	}
-	
-	public static function dlist($table, $cols) {
-		self::code($table, $cols, 'data-table-list');
-	}
-	
-	public static function dnew($table, $cols) {
-		self::code($table, $cols, 'data-table-new');
-	}
 
-	private static function head() {
-	?>
-		<style>
-			.pesqdt {
-				float: left;
-				margin-top: 5px;
-				margin-left: 10px;
-			}
-			
-			.btnsdt {
-				float: left;
-				margin-top: 5px;
-				margin-left: 10px;
-			}
-			
-			.dtextra {
-				float: left;
-				margin-top: 5px;
-				margin-left: 10px;
-			}
-			
-			.dtnovo {
-				float: left;
-				margin-top: 5px;
-				margin-left: 10px;
-			}
-			
-			.borda-vermelha {
-				border: 1px solid red
-			}
-		
-			.borda-azul {
-				border: 1px solid blue
-			}
-
-			a.linkno {
-				text-decoration: none;
-			}
-		</style>
-		<script>
-			$(function() {
-				$('.data-table').DataTable({
-					dom: 'rt<".pesqdt"f><".btnsdt"B><"dtextra">p'
-					, buttons: [ 'copy', 'csv', 'excel', 'print']
-				});
-				
-				$('.data-table-list').DataTable({
-					dom: 'rt<".pesqdt"f><"dtextra">p'
-				});
-				
-				$(".data-table-new").each(function(index, elm) {
-					var nm = $(elm).attr("data-name");
-					
-					if ( ! nm ) {
-						alertify.notify("data-name sao necessários no elemento: " + elm.id);
-						return;
+	public static function kill($s) {
+		echo "</template><pre>";
+		var_dump($s);
+		echo "</pre>";
+		throw new \Exception($s);
+		die();
+	}
+	
+	public static function forceArray(...$values) {
+		$ret = [];
+		foreach ( $values as $value) {
+			if ( $value ) {
+				if ( ! is_array($value) ) $ret[] = $value;
+				else {
+					foreach ( $value as $val ) {
+						$ret[] = $val;
 					}
-					
-					
-					var ac = $(elm).attr("data-action");
-					
-					if ( ! ac ) {
-						alertify.notify("data-action sao necessários no elemento: " + elm.id);
-						return;
-					}
-					
-					
-					$('.data-table-new').DataTable({
-						dom: 'rt<".pesqdt"f><".btnsdt"B><".dtnovo' + nm + '">p'
-						, buttons: [ 'copy', 'csv', 'excel', 'print']
-					});
-
-					$(".dtnovo" + nm).html('<button class="btn btn-default" onclick="location=\'/' + ac + '/add\'"><span><i class="fa fa-plus"></i> ' + nm + '</span></button>');
-					$(".dtnovo" + nm).addClass('dtnovo');
-				});
-			});
-		</script>
-		<?php
+				}
+			}
+		}
+		return $ret;
 	}
-	
-	private static function code($table, $cols, $cls) {
-		$table = (array)json_decode(json_encode($table));
-		foreach ( $table as $key => $value ) $table[$key] = (array)$value;
+
+	public static function shortAlias2fullName(&$opts, $short, $long) {
+		if ( isset($opts[$short]) ) {
+			if ( isset($opts[$long]) ) {
+				self::kill(
+					"Fernandobhz\DatatableGenerator"
+					. " opts cannot have $short and $long"
+					. " together "
+				);
+			} else {
+				$opts[$long] = $opts[$short];
+				unset($opts[$short]);
+			}
+		}
+	}
+
+	public static function normatize(&$opts) {
+		self::shortAlias2fullName($opts, 'ss', 'server-side');
+		self::shortAlias2fullName($opts, 'ac', 'action');
+		self::shortAlias2fullName($opts, 'nm', 'name');
+
+		if ( ! $opts['rows'] && ! $opts['server-side'] ) self::kill("opts['row'] is required when opts['server-side'||'ss'] not defined" . var_export($opts, true) );
+		if ( ! $opts['cols'] ) self::kill("opts['col'] is required" . var_export($opts, true) );
+
+		if ( ! isset($opts['class']) ) $opts['class'] = [];
+		if ( ! is_array($opts['class']) ) $opts['class'] = [ $opts['class'] ];
+
+		if ( $opts['rows'] ) {
+			foreach ( $opts['rows'] as $index => $row ) {
+				$opts['rows'][$index] = (array)$row;
+			}
+		}
+
+		if ( ! isset($opts['attrs']) ) {
+			$opts['attrs'] = [];
+		}
+
+		if ( ! $opts['rand'] ) $opts['rand'] = mt_rand(1, 10000000);
+		if ( ! $opts['name'] ) $opts['name'] = "dt" . $opts['rand'];
+		if ( ! $opts['action'] ) $opts['action'] = "add";
+
+		if ( $opts['id'] && $opts['attrs']['id'] ) {
+			self::kill("both opts['id'] and opts['attrs']['id'] defined");
+		}
+
+		if ( $opts['id'] ) $opts['attrs']['id'] = $opts['id'];
+
+		$opts['cssclass'] = 'dtgen' . $opts['rand'];
 		
-		$rows = []; foreach ( $table as $x ) $rows[] = array_values($x);
-		//var_dump($cols); die();
-		?>
-			<table 
-				id="mytable" 
-				class="table table-striped table-bordered <?=$cls?>"
-				data-name="Pessoas" 
-				data-action="add">				
-				<thead>
-					<tr>
-						<?php foreach ( $cols as $col ): ?>
-						<th>
-							<?=$col?>
-						</th>
-						<?php endforeach; ?>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ( $rows as $row ): ?>
-					<tr>
-						<?php foreach ( $row as $val): ?>
-						<td>
-							<?=$val?>
-						</td>
-						<?php endforeach; ?>
-					</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		<?php		
+		return $opts;
+	}
+
+	public static function dtable(...$args) {
+		if ( count($args) == 1 ) {
+			$opts = $args[0];
+			self::verb2code($args[0], 'data-table');
+		} else {
+			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
+			self::verb2code($args[0], $args[1], $args[2], 'data-table');
+		}
+	}
+
+	public static function dlist(...$args) {
+		if ( count($args) == 1 ) {
+			$opts = $args[0];
+			self::verb2code($args[0], 'data-table-list');
+		} else {
+			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
+			self::verb2code($rows, $cols, $opts, 'data-table-list');		
+		}
+	}
+
+	public static function dnew($rows, $cols, $opts = []) {
+		if ( count($args) == 1 ) {
+			$opts = $args[0];
+			self::verb2code($args[0], 'data-table-new');
+		} else {
+			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
+			self::verb2code($rows, $cols, $opts, 'data-table-new');
+		}
+	}
+
+
+	private static function verb2code(...$args) {
+		if ( count($args) == 2 ) {
+			$opts = $args[0]; $verb = $args[1];
+		} else {
+			$row = $args[0]; $cols = $args[1]; $opts = $args[2]; $verb = $args[3];
+
+			$opts['rows'] = $rows;
+			$opts['cols'] = $cols;
+		}
+
+		$opts['class'] = self::forceArray($verb, $opt['class']);
+		self::code($opts);
+	}
+
+	public static function code($opts) {
+		self::normatize($opts);
+		$rows = $opts['rows'];
+		$cols = $opts['cols'];
+		$class = $opts['class'];
+		$attrs = $opts['attrs'];
+		$name = $opts['name'];
+		$action = $opts['action'];
+		$cssclass = $opts['cssclass'];
+
+		if ( $opts['server-side'] ) {
+			$attrs['data-server-side'] = $opts['server-side'];
+		}
+
+		$attrs['data-columns-name'] = base64_encode(json_encode($cols));
+		$classes = implode(" ", $class);
+
+		$attributes = "";
+		foreach( $attrs as $key => $value ) {
+			$attributes
+				= $attributes
+				. $key
+				. '="'
+				. $value
+				. '" '
+			;
+		}
+
+		if ( $rows ) {
+			$values = []; 
+			foreach ( $rows as $row ) {
+				$values[] = array_values($row);
+			}
+		}
+		
+		//var_dump($values); die();
+		include('TableCode.php');
+		include('HeadCode.php');
 	}
 }
 ?>
