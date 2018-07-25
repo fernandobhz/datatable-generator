@@ -1,10 +1,13 @@
-<table
-	<?=$attributes?>
-	class="<?="$verb-$cssclass $classes"?> dtgen table table-striped table-bordered"
-	data-name="<?=$name?>" 
-	data-action="<?=$action?>"
-	>
-	<?php if ( ! $opts['server-side'] ) { ?>
+<?php
+	//echo "</template><pre>"; var_dump($opts); die();
+	$attributes = $opts['attributes'];
+	$classes = $opts['classes'];
+	$cols = $opts['cols'];
+	$values = $opts['values'];
+	$serverSide = $opts['server-side'];
+?>
+<table <?=$attributes?> class="<?=$classes?>">
+	<?php if ( ! $serverSide ) { ?>
 		<thead>
 			<tr>
 				<?php foreach ( $cols as $col ): ?>
@@ -15,7 +18,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<?php if ( ! $opts['server-side'] ) { ?>
+			<?php if ( ! $serverSide ) { ?>
 				<?php foreach ( $values as $row ): ?>
 				<tr>
 					<?php foreach ( $row as $val): ?>

@@ -1,23 +1,18 @@
+<?php $rand = $opts['rand']; ?>
 <style>
-	.pesqdt-<?=$cssclass?> {
+	.dtgen-search-<?=$rand?> {
 		float: left;
 		margin-top: 5px;
 		margin-left: 10px;
 	}
 	
-	.btnsdt-<?=$cssclass?> {
+	.dtgen-export-<?=$rand?> {
 		float: left;
 		margin-top: 5px;
 		margin-left: 10px;
 	}
 	
-	.dtextra-<?=$cssclass?> {
-		float: left;
-		margin-top: 5px;
-		margin-left: 10px;
-	}
-	
-	.dtnovo-<?=$cssclass?> {
+	.dtgen-new-<?=$rand?> {
 		float: left;
 		margin-top: 5px;
 		margin-left: 10px;

@@ -7,17 +7,11 @@ Class DatatableGenerator {
 		echo ("hello datatable generator");
 	}
 
-	public static function minify($code) {
+	public static function minify($code) { return $code;
 		$code = str_replace(["\n", "\t"], "", $code);
 		$code = str_replace("  ", " ", $code);
-		
+
 		return $code;
-	}
-	
-	public static function include2string($file) {
-		ob_start();
-		include($file);
-		return ob_get_clean();
 	}
 
 	public static function kill($s) {
@@ -30,16 +24,23 @@ Class DatatableGenerator {
 
 	public static function forceArray(...$values) {
 		$ret = [];
+
 		foreach ( $values as $value) {
-			if ( $value ) {
-				if ( ! is_array($value) ) $ret[] = $value;
-				else {
-					foreach ( $value as $val ) {
-						$ret[] = $val;
-					}
-				}
-			}
+			//strip tabs
+			$value = str_replace("\t", " ", $value);
+
+			//strip double spaces
+			while (strpos($value, "  "))
+				$value = str_replace("  ", " ", $value);
+
+			//convert to array
+			$value = explode(" ", $value);
+
+			//remove invalid entries
+			foreach ( $value as $val )
+				if ( $val ) $ret[] = $val;
 		}
+
 		return $ret;
 	}
 
@@ -58,126 +59,104 @@ Class DatatableGenerator {
 		}
 	}
 
-	public static function normatize(&$opts) {
+	public static function code($opts) {
+		//short alias
 		self::shortAlias2fullName($opts, 'ss', 'server-side');
 		self::shortAlias2fullName($opts, 'ac', 'action');
 		self::shortAlias2fullName($opts, 'nm', 'name');
 
+
+		//requirements
 		if ( ! $opts['rows'] && ! $opts['server-side'] ) self::kill("opts['row'] is required when opts['server-side'||'ss'] not defined" . var_export($opts, true) );
 		if ( ! $opts['cols'] ) self::kill("opts['col'] is required" . var_export($opts, true) );
+		if ( $opts['id'] && $opts['attrs']['id'] ) self::kill("both opts['id'] and opts['attrs']['id'] defined");
 
+
+		//computed
+		$opts['rand'] = mt_rand(1, 10000000);
+
+
+		//default if not set [optional]
 		if ( ! isset($opts['class']) ) $opts['class'] = [];
-		if ( ! is_array($opts['class']) ) $opts['class'] = self::forceArray(explode($opts['class'], " "));
+		if ( ! is_array($opts['class']) ) $opts['class'] = self::forceArray($opts['class']);
+		if ( ! isset($opts['new']) ) $opts['new'] = false;
+		if ( ! isset($opts['export']) ) $opts['export'] = true;
+		if ( ! isset($opts['search']) ) $opts['search'] = true;
+		if ( ! isset($opts['paging']) ) $opts['search'] = true;
+		if ( ! isset($opts['attrs']) ) $opts['attrs'] = [];
+		if ( ! isset($opts['name']) ) $opts['name'] = "Registro";
+		if ( ! isset($opts['action']) ) $opts['action'] = "add";
 
-		if ( $opts['rows'] ) {
-			foreach ( $opts['rows'] as $index => $row ) {
-				$opts['rows'][$index] = (array)$row;
-			}
-		}
 
-		if ( ! isset($opts['attrs']) ) {
-			$opts['attrs'] = [];
-		}
-
-		if ( ! $opts['rand'] ) $opts['rand'] = mt_rand(1, 10000000);
-		if ( ! $opts['name'] ) $opts['name'] = "dt" . $opts['rand'];
+		//default if invalid value
 		if ( ! $opts['action'] ) $opts['action'] = "add";
 
-		if ( $opts['id'] && $opts['attrs']['id'] ) {
-			self::kill("both opts['id'] and opts['attrs']['id'] defined");
-		}
 
+		//laydown optional attributes
 		if ( $opts['id'] ) $opts['attrs']['id'] = $opts['id'];
+		if ( $opts['server-side'] ) $opts['attrs']['data-dtgen-server-side'] = $opts['server-side'];
+		if ( $opts['new'] ) $opts['attrs']['data-dtgen-new'] = $opts['new'];
+		if ( $opts['export'] ) $opts['attrs']['data-dtgen-export'] = $opts['export'];
+		if ( $opts['search'] ) $opts['attrs']['data-dtgen-search'] = $opts['search'];
+		if ( $opts['paging'] ) $opts['attrs']['data-dtgen-paging'] = $opts['paging'];
 
-		$opts['cssclass'] = 'dtgen' . $opts['rand'];
 
-		return $opts;
-	}
+		//laydown required attributes
+		$opts['attrs']['data-dtgen-rand'] = $opts['rand'];
+		$opts['attrs']['data-dtgen-name'] = $opts['name'];
+		$opts['attrs']['data-dtgen-action'] = $opts['action'];
+		$opts['attrs']['data-dtgen-columns-name'] = base64_encode(json_encode($opts['cols']));
 
-	public static function dtable(...$args) {
-		if ( count($args) == 1 ) {
-			$opts = $args[0];
-			return self::verb2code($args[0], 'data-table');
-		} else {
-			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			return self::verb2code($args[0], $args[1], $args[2], 'data-table');
-		}
-	}
 
-	public static function dlist(...$args) {
-		if ( count($args) == 1 ) {
-			$opts = $args[0];
-			return self::verb2code($args[0], 'data-table-list');
-		} else {
-			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			return self::verb2code($rows, $cols, $opts, 'data-table-list');
-		}
-	}
+		//classes
+		$opts['class'][] = 'dtgen';
+		$opts['class'][] = 'dtgen-' . $opts['rand'];
 
-	public static function dnew($rows, $cols, $opts = []) {
-		if ( count($args) == 1 ) {
-			$opts = $args[0];
-			return self::verb2code($args[0], 'data-table-new');
-		} else {
-			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			return self::verb2code($rows, $cols, $opts, 'data-table-new');
-		}
-	}
+		$opts['class'][] = 'table';
+		$opts['class'][] = 'table-stripped';
+		$opts['class'][] = 'table-bordered';
 
-	private static function verb2code(...$args) {
-		if ( count($args) == 2 ) {
-			$opts = $args[0]; $verb = $args[1];
-		} else {
-			$row = $args[0]; $cols = $args[1]; $opts = $args[2]; $verb = $args[3];
+		//row casting to assoc array
+		if ( $opts['rows'] )
+			foreach ( $opts['rows'] as $index => $row )
+				$opts['rows'][$index] = (array)$row;
 
-			$opts['rows'] = $rows;
-			$opts['cols'] = $cols;
-		}
-		
-		$opts['verb'] = $verb;
-		return self::code($opts);
-	}
 
-	public static function code($opts) {
-		self::normatize($opts);
-		$rows = $opts['rows'];
-		$cols = $opts['cols'];
-		$class = $opts['class'];
-		$attrs = $opts['attrs'];
-		$name = $opts['name'];
-		$action = $opts['action'];
-		$cssclass = $opts['cssclass'];
-		$verb = $opts['verb'];
+		//values array building
+		$values = [];
+		if ( $opts['rows'] )
+			foreach ( $rows as $row )
+				$values[] = array_values($row);
 
-		if ( $opts['server-side'] ) {
-			$attrs['data-server-side'] = $opts['server-side'];
-		}
 
-		$attrs['data-columns-name'] = base64_encode(json_encode($cols));
-		$classes = implode(" ", $class);
+		//classes list
+		$opts['classes'] = implode(" ", $opts['class']);
 
-		$attributes = "";
-		foreach( $attrs as $key => $value ) {
-			$attributes
-				= $attributes
+
+		//attributes list
+		$opts['attributes'] = "";
+		foreach( $opts['attrs'] as $key => $value ) {
+			$opts['attributes']
+				= $opts['attributes']
 				. $key
 				. '="'
 				. $value
 				. '" '
 			;
 		}
-
-		$values = [];
-		if ( $rows ) {
-			foreach ( $rows as $row ) {
-				$values[] = array_values($row);
-			}
-		}
-
+		
+		
+		//debug
+		//echo "</template><pre>"; var_dump($opts); die();
+		
+		
+		//generating codes
 		ob_start(); include('StyleCode.php'); $style = self::minify(ob_get_clean());
 		ob_start(); include('ScriptCode.php'); $script = self::minify(ob_get_clean());
 		ob_start(); include('TableCode.php'); $body = self::minify(ob_get_clean());
-		
+
+
+		//return codes
 		return (object) [
 			'body' => "$body\n",
 			'style' => "$style\n",
