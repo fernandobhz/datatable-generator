@@ -7,6 +7,13 @@ Class DatatableGenerator {
 		echo ("hello datatable generator");
 	}
 
+	public static function minify($code) {
+		$code = str_replace(["\n", "\t"], "", $code);
+		$code = str_replace("  ", " ", $code);
+		
+		return $code;
+	}
+	
 	public static function include2string($file) {
 		ob_start();
 		include($file);
@@ -167,14 +174,15 @@ Class DatatableGenerator {
 			}
 		}
 
-		ob_start(); include('StyleCode.php'); $style = ob_get_clean();
-		ob_start(); include('ScriptCode.php'); $script = ob_get_clean();
-		ob_start(); include('TableCode.php'); $body = ob_get_clean();
+		ob_start(); include('StyleCode.php'); $style = self::minify(ob_get_clean());
+		ob_start(); include('ScriptCode.php'); $script = self::minify(ob_get_clean());
+		ob_start(); include('TableCode.php'); $body = self::minify(ob_get_clean());
+		
 		return (object) [
-			'body' => $body,
-			'style' => $style,
-			'script' => $script,
-			'head' => $style.$script
+			'body' => "$body\n",
+			'style' => "$style\n",
+			'script' => "$script\n",
+			'head' => "$style $script\n"
 		];
 	}
 }
