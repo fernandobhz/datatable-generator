@@ -7,6 +7,12 @@ Class DatatableGenerator {
 		echo ("hello datatable generator");
 	}
 
+	public static function include2string($file) {
+		ob_start();
+		include($file);
+		return ob_get_clean();
+	}
+	
 	public static function kill($s) {
 		echo "</template><pre>";
 		var_dump($s);
@@ -84,33 +90,32 @@ Class DatatableGenerator {
 	public static function dtable(...$args) {
 		if ( count($args) == 1 ) {
 			$opts = $args[0];
-			self::verb2code($args[0], 'data-table');
+			return self::verb2code($args[0], 'data-table');
 		} else {
 			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			self::verb2code($args[0], $args[1], $args[2], 'data-table');
+			return self::verb2code($args[0], $args[1], $args[2], 'data-table');
 		}
 	}
 
 	public static function dlist(...$args) {
 		if ( count($args) == 1 ) {
 			$opts = $args[0];
-			self::verb2code($args[0], 'data-table-list');
+			return self::verb2code($args[0], 'data-table-list');
 		} else {
 			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			self::verb2code($rows, $cols, $opts, 'data-table-list');		
+			return self::verb2code($rows, $cols, $opts, 'data-table-list');		
 		}
 	}
 
 	public static function dnew($rows, $cols, $opts = []) {
 		if ( count($args) == 1 ) {
 			$opts = $args[0];
-			self::verb2code($args[0], 'data-table-new');
+			return self::verb2code($args[0], 'data-table-new');
 		} else {
 			$row = $args[0]; $cols = $args[1]; $opts = $args[2];
-			self::verb2code($rows, $cols, $opts, 'data-table-new');
+			return self::verb2code($rows, $cols, $opts, 'data-table-new');
 		}
 	}
-
 
 	private static function verb2code(...$args) {
 		if ( count($args) == 2 ) {
@@ -123,7 +128,7 @@ Class DatatableGenerator {
 		}
 
 		$opts['class'] = self::forceArray($verb, $opt['class']);
-		self::code($opts);
+		return self::code($opts);
 	}
 
 	public static function code($opts) {
@@ -154,16 +159,16 @@ Class DatatableGenerator {
 			;
 		}
 
+		$values = []; 
 		if ( $rows ) {
-			$values = []; 
 			foreach ( $rows as $row ) {
 				$values[] = array_values($row);
 			}
 		}
 		
-		//var_dump($values); die();
-		include('TableCode.php');
-		include('HeadCode.php');
+		ob_start(); include('HeadCode.php'); $head = ob_get_clean();
+		ob_start(); include('TableCode.php'); $body = ob_get_clean();
+		return (object)['body' => $body, 'head' => $head];
 	}
 }
 ?>
