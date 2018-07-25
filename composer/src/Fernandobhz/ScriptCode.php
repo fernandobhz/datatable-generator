@@ -53,9 +53,7 @@
 				}
 			}
 
-			window.xpto = JSON.stringify(x, null, 4);
-			console.log(xpto);
-			debugger;
+			//window.xpto = JSON.stringify(x, null, 4); console.log(xpto); debugger;
 			
 			$(elm).DataTable(x);
 			if ( isnew )
