@@ -7,7 +7,12 @@
 	$serverSide = $opts['server-side'];
 ?>
 <table <?=$attributes?> class="<?=$classes?>">
-	<?php if ( ! $serverSide ) { ?>
+	<?php if ( $serverSide ) { ?>
+		<thead>
+		</thead>
+		<tbody>
+		</tbody>
+	<?php } else { ?>
 		<thead>
 			<tr>
 				<?php foreach ( $cols as $col ): ?>

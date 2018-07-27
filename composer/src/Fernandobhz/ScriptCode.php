@@ -15,6 +15,7 @@
 			var isexport	 	= $(elm).attr("data-dtgen-export");
 			var isnew 			= $(elm).attr("data-dtgen-new");
 			var ispaging 		= $(elm).attr("data-dtgen-paging");
+			var isordering 		= $(elm).attr("data-dtgen-ordering");
 
 			var dataname 		= $(elm).attr("data-dtgen-name");
 			var dataaction 		= $(elm).attr("data-dtgen-action");
@@ -33,6 +34,9 @@
 
 			var x = { dom: dom, buttons: buttons }
 
+			if ( isordering == "true" ) x.ordering = true;
+			else x.ordering = false;
+			
 			if ( serverside ) {
 				x.processing = true;
 				x.serverSide = true;

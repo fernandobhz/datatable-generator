@@ -44,28 +44,7 @@ Class DatatableGenerator {
 		return $ret;
 	}
 
-	public static function shortAlias2fullName(&$opts, $short, $long) {
-		if ( isset($opts[$short]) ) {
-			if ( isset($opts[$long]) ) {
-				self::kill(
-					"Fernandobhz\DatatableGenerator"
-					. " opts cannot have $short and $long"
-					. " together "
-				);
-			} else {
-				$opts[$long] = $opts[$short];
-				unset($opts[$short]);
-			}
-		}
-	}
-
 	public static function code($opts) {
-		//short alias
-		self::shortAlias2fullName($opts, 'ss', 'server-side');
-		self::shortAlias2fullName($opts, 'ac', 'action');
-		self::shortAlias2fullName($opts, 'nm', 'name');
-
-
 		//requirements
 		if ( ! $opts['rows'] && ! $opts['server-side'] ) self::kill("opts['row'] is required when opts['server-side'||'ss'] not defined" . var_export($opts, true) );
 		if ( ! $opts['cols'] ) self::kill("opts['col'] is required" . var_export($opts, true) );
@@ -83,6 +62,7 @@ Class DatatableGenerator {
 		if ( ! isset($opts['export']) ) $opts['export'] = true;
 		if ( ! isset($opts['search']) ) $opts['search'] = true;
 		if ( ! isset($opts['paging']) ) $opts['search'] = true;
+		if ( ! isset($opts['ordering']) ) $opts['ordering'] = true;
 		if ( ! isset($opts['attrs']) ) $opts['attrs'] = [];
 		if ( ! isset($opts['name']) ) $opts['name'] = "Registro";
 		if ( ! isset($opts['action']) ) $opts['action'] = "add";
@@ -99,6 +79,7 @@ Class DatatableGenerator {
 		if ( $opts['export'] ) $opts['attrs']['data-dtgen-export'] = $opts['export'];
 		if ( $opts['search'] ) $opts['attrs']['data-dtgen-search'] = $opts['search'];
 		if ( $opts['paging'] ) $opts['attrs']['data-dtgen-paging'] = $opts['paging'];
+		if ( $opts['ordering'] ) $opts['attrs']['data-dtgen-ordering'] = $opts['ordering'];
 
 
 		//laydown required attributes
